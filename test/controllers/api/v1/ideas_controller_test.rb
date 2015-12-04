@@ -44,4 +44,32 @@ class Api::V1::IdeasControllerTest < ActionController::TestCase
     assert_equal id, json_response['id']
   end
 
+  test 'create adds a new idea to the database' do
+    assert_difference 'Idea.count', 1 do
+      idea = { title: 'New Idea', body: 'Something' }
+
+      post :create, idea: idea, format: :json
+    end
+  end
+
+  test 'create returns new idea' do
+    idea = { title: 'New Idea', body: 'Something' }
+
+    post :create, idea: idea, format: :json
+
+    assert_equal idea[:title], json_response['title']
+    assert_equal idea[:body], json_response['body']
+    assert_equal 'swill',json_response['quality']
+  end
+
+  test 'rejects a new idea without a title' do
+    idea = { title: 'New Idea' }
+    number_of_ideas = Idea.all.count
+
+    post :create, idea: idea, format: :json
+
+    assert_response 422
+    assert_includes json_response['errors']['body'], "can't be blank"
+  end
+
 end
